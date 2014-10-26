@@ -7,11 +7,25 @@ ZFS_CMD=/sbin/zfs
 
 
 # Reads the value of a ZFS propety.
-rdnzl_zfs_get_property_value()
+# TODO: This will never fail for user properties but returns
+# '-' as the value for non-existent user properties.
+# This needs to be split into two functions, one for builtin
+# properties and other for user properties.
+rdnzl_zfs_get_user_property_value()
 {
+    # TODO: Test that the number of argument is correct.
     ZFSFS="$1"
     ZFSPROP="$2"
-    "${ZFS_CMD}" get -H -o value "$ZFSPROP" "$ZFSFS"
+
+    # TODO: Test that there is at least one colon (:) in ZFSPROP
+    USERPROPVALUE=$("${ZFS_CMD}" get -H -o value "$ZFSPROP" "$ZFSFS")
+    
+    if test "${USERPROPVALUE}" = "-"; then
+        return 1
+    fi
+
+    echo "${USERPROPVALUE}"
+    return 0
 }
 
 # Tests if a dataset exists
